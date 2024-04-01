@@ -1,42 +1,97 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-
-import { useColorScheme } from "@/components/useColorScheme";
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+import {
+  Slot,
+  Stack,
+  useFocusEffect,
+  useRouter,
+  useSegments,
 } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import React, { useContext, useEffect, useState } from "react";
+export { ErrorBoundary } from "expo-router";
+
+import { AuthContext, AuthContextProvider } from "@/contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+const InitialLayout = () => {
+  const segments = useSegments();
+  const router = useRouter();
+
+  const [seenScreen, setSeenScreen] = useState<any>(false);
+  const { isAuthenticated, status, startBackgroundTracking } =
+    useContext(AuthContext);
+
+  const getScreen = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("seenScreen");
+      setSeenScreen(jsonValue);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const removeItem = async () => {
+    await AsyncStorage.clear();
+  };
+
+  useEffect(() => {
+    getScreen();
+    // removeItem();
+  }, []);
+
+  useEffect(() => {
+    const inTabsGroup = segments[0] === "(app)";
+
+    if (isAuthenticated && !inTabsGroup) {
+      router.replace("/(app)/(tabs)/");
+    } else if (
+      !isAuthenticated &&
+      status === "granted" &&
+      seenScreen === false
+    ) {
+      router.replace("/(onboarding)/onboardOne");
+    } else if (
+      !isAuthenticated &&
+      status === "granted" &&
+      (seenScreen === false || seenScreen === null)
+    ) {
+      router.replace("/(auth)/register");
+    }
+  }, [isAuthenticated, status]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      startBackgroundTracking();
+    }, [])
+  );
+
+  return <Slot />;
+};
+
+const RootLayout = () => {
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Railway1: require("../assets/fonts/Raleway-Regular.ttf"),
+    Railway2: require("../assets/fonts/Raleway-Bold.ttf"),
+    Railway3: require("../assets/fonts/Raleway-SemiBold.ttf"),
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
   useEffect(() => {
     if (loaded) {
+      <StatusBar style="light" />;
       SplashScreen.hideAsync();
     }
   }, [loaded]);
@@ -44,19 +99,11 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-      </Stack>
-    </ThemeProvider>
+    <AuthContextProvider>
+      <InitialLayout />
+    </AuthContextProvider>
   );
-}
+};
+
+export default RootLayout;
