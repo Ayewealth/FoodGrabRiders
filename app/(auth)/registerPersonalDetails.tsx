@@ -17,6 +17,7 @@ import { SelectList } from "react-native-dropdown-select-list";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather, Entypo } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const registerPersonalDetails = () => {
   const [nin, setNin] = useState("");
@@ -24,8 +25,8 @@ const registerPersonalDetails = () => {
   const [date, setDate] = useState(new Date());
   const [gender, setGender] = useState("");
   const [vehicleType, setVehicleType] = useState("");
-  const [driverLicense, setDriverLicense] = useState(null);
-  const [photo, setPhoto] = useState(null);
+  const [driverLicense, setDriverLicense] = useState();
+  const [photo, setPhoto] = useState();
 
   const [showPicker, setShowPicker] = useState(false);
 
@@ -61,6 +62,13 @@ const registerPersonalDetails = () => {
     { key: "2", value: "Motorcycle" },
     { key: "2", value: "bicycle" },
   ];
+
+  const handleDeletePhoto = () => {
+    setPhoto(undefined);
+  };
+  const handleDeleteLicense = () => {
+    setDriverLicense(undefined);
+  };
 
   const uploadLicense = async () => {
     try {
@@ -140,15 +148,19 @@ const registerPersonalDetails = () => {
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <View
-                style={{
-                  backgroundColor: "#F0F2F5",
-                  padding: 15,
-                  borderRadius: 50,
-                }}
-              >
-                <Feather name="upload-cloud" size={20} color="black" />
-              </View>
+              {driverLicense ? (
+                <Image source={{ uri: driverLicense }} style={styles.image} />
+              ) : (
+                <View
+                  style={{
+                    backgroundColor: "#F0F2F5",
+                    padding: 15,
+                    borderRadius: 50,
+                  }}
+                >
+                  <Feather name="upload-cloud" size={20} color="black" />
+                </View>
+              )}
               <View>
                 <Text style={{ fontFamily: "Railway3" }}>Driver License</Text>
                 <Text
@@ -163,19 +175,43 @@ const registerPersonalDetails = () => {
                   Max. 5MB
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={uploadLicense}
-                style={{
-                  backgroundColor: "#54804D",
-                  justifyContent: "center",
-                  paddingHorizontal: 15,
-                  borderRadius: 10,
-                }}
-              >
-                <Text style={{ color: "#fff", fontFamily: "Railway2" }}>
-                  Upload
-                </Text>
-              </TouchableOpacity>
+              {driverLicense ? (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#EC1C23",
+                    justifyContent: "center",
+                    paddingHorizontal: 15,
+                    borderRadius: 10,
+                  }}
+                  onPress={handleDeleteLicense}
+                >
+                  <MaterialCommunityIcons
+                    name="delete-outline"
+                    size={24}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={uploadLicense}
+                  style={{
+                    backgroundColor: "#54804D",
+                    justifyContent: "center",
+                    paddingHorizontal: 15,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontFamily: "Railway2",
+                      fontSize: 14,
+                    }}
+                  >
+                    Upload
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -183,15 +219,19 @@ const registerPersonalDetails = () => {
             <View
               style={{ flexDirection: "row", justifyContent: "space-between" }}
             >
-              <View
-                style={{
-                  backgroundColor: "#F0F2F5",
-                  padding: 15,
-                  borderRadius: 50,
-                }}
-              >
-                <Feather name="upload-cloud" size={20} color="black" />
-              </View>
+              {photo ? (
+                <Image source={{ uri: photo }} style={styles.image} />
+              ) : (
+                <View
+                  style={{
+                    backgroundColor: "#F0F2F5",
+                    padding: 15,
+                    borderRadius: 50,
+                  }}
+                >
+                  <Feather name="upload-cloud" size={20} color="black" />
+                </View>
+              )}
               <View>
                 <Text style={{ fontFamily: "Railway3" }}>Your Face</Text>
                 <Text
@@ -206,25 +246,43 @@ const registerPersonalDetails = () => {
                   Max. 5MB
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={uploadPhoto}
-                style={{
-                  backgroundColor: "#54804D",
-                  justifyContent: "center",
-                  paddingHorizontal: 15,
-                  borderRadius: 10,
-                }}
-              >
-                <Text
+              {photo ? (
+                <TouchableOpacity
                   style={{
-                    color: "#fff",
-                    fontFamily: "Railway2",
-                    fontSize: 14,
+                    backgroundColor: "#EC1C23",
+                    justifyContent: "center",
+                    paddingHorizontal: 15,
+                    borderRadius: 10,
+                  }}
+                  onPress={handleDeletePhoto}
+                >
+                  <MaterialCommunityIcons
+                    name="delete-outline"
+                    size={24}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={uploadPhoto}
+                  style={{
+                    backgroundColor: "#54804D",
+                    justifyContent: "center",
+                    paddingHorizontal: 15,
+                    borderRadius: 10,
                   }}
                 >
-                  Upload
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontFamily: "Railway2",
+                      fontSize: 14,
+                    }}
+                  >
+                    Upload
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
         </View>
@@ -427,5 +485,12 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     marginTop: 20,
+  },
+  image: {
+    borderRadius: 50,
+    width: 55,
+    height: 55,
+    borderColor: "#385533",
+    borderWidth: 1,
   },
 });

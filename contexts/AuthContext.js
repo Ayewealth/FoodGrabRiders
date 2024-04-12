@@ -10,13 +10,17 @@ export const AuthContextProvider = ({ children }) => {
   const { isAuthenticated, setIsAuthenticated } = useState(false);
   const { isLoading, setIsLoading } = useState(false);
   const [status, setStatus] = useState("");
+  const [location, setLocation] = useState(null);
+  // console.log(location);
 
   const startBackgroundTracking = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status == "granted") {
       await Location.requestBackgroundPermissionsAsync();
     }
+    let location = await Location.getCurrentPositionAsync({});
     setStatus(status);
+    setLocation(location);
   };
 
   const loginUser = async (e) => {};
@@ -29,6 +33,7 @@ export const AuthContextProvider = ({ children }) => {
 
     startBackgroundTracking,
     status,
+    location,
   };
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>

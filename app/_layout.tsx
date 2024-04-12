@@ -55,15 +55,11 @@ const InitialLayout = () => {
     } else if (
       !isAuthenticated &&
       status === "granted" &&
-      seenScreen === false
-    ) {
-      router.replace("/(onboarding)/onboardOne");
-    } else if (
-      !isAuthenticated &&
-      status === "granted" &&
       (seenScreen === false || seenScreen === null)
     ) {
-      router.replace("/(auth)/register");
+      router.replace("/(onboarding)/onboardOne");
+    } else if (!isAuthenticated && status === "granted" && seenScreen) {
+      router.replace("/(auth)/login");
     }
   }, [isAuthenticated, status]);
 

@@ -160,6 +160,19 @@ const register = () => {
             </Text>
           </TouchableOpacity>
         </Link>
+        <Text
+          style={{
+            textAlign: "center",
+            paddingTop: 10,
+            fontSize: 15,
+            fontFamily: "Railway3",
+          }}
+        >
+          Have an account?
+          <Link replace href={"/login"}>
+            <Text style={{ color: "#385533" }}> Login</Text>
+          </Link>
+        </Text>
       </Animated.View>
     </SafeAreaView>
   );
