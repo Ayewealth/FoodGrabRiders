@@ -32,7 +32,8 @@
       },
       "permissions": [
         "ACCESS_BACKGROUND_LOCATION"
-      ]
+      ],
+      "package": "com.ayewealth.foodgrabriders"
     },
     "web": {
       "bundler": "metro",
@@ -45,6 +46,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e52ec6ed-4dbb-488e-8b36-d6e2288a7b2b"
+      }
     }
   }
 }
