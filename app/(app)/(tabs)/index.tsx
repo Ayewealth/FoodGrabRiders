@@ -1,45 +1,66 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/contexts/AuthContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 
 export default function TabOneScreen() {
   const { location } = useContext(AuthContext);
-
   const [online, setOnline] = useState(false);
+  const [loading, setLoading] = useState(true); // Added loading state
 
   const handleOnline = () => {
     setOnline(!online);
   };
 
   const INITIALREGION = {
-    latitude: location && location.coords.latitude,
-    longitude: location && location.coords.longitude,
+    latitude: location?.coords?.latitude,
+    longitude: location?.coords?.longitude,
     latitudeDelta: 0.0022,
     longitudeDelta: 0.0021,
   };
+
+  useEffect(() => {
+    if (location) {
+      setLoading(false); // Set loading to false when location is available
+    }
+  }, [location]);
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
-      <MapView
-        provider={PROVIDER_GOOGLE}
-        style={StyleSheet.absoluteFill}
-        initialRegion={INITIALREGION}
-        showsUserLocation
-        showsMyLocationButton={false}
-      />
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={"#385533"} />
+        </View>
+      ) : (
+        <MapView
+          provider={PROVIDER_GOOGLE}
+          style={StyleSheet.absoluteFill}
+          initialRegion={INITIALREGION}
+          showsUserLocation
+          showsMyLocationButton={false}
+        />
+      )}
       <View
         style={{
           position: "absolute",
           bottom: 0,
           flexDirection: "column",
           gap: 20,
-          borderRadius: 30,
+          borderTopLeftRadius: 30,
+          borderTopRightRadius: 30,
           paddingHorizontal: 20,
           paddingVertical: 30,
           backgroundColor: "#FFFFFF",

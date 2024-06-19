@@ -6,18 +6,61 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { setUserData, setUserToken } = useContext(AuthContext);
+
+  const router = useRouter();
+
+  const signin = async () => {
+    setIsLoading(true);
+
+    try {
+      let response = await fetch(
+        "https://api.foodgrab.africa/couriers/api/v1/signin",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUserToken(data.token);
+        setUserData(data.data);
+        await AsyncStorage.setItem("isAuthenticated", JSON.stringify(true));
+        await AsyncStorage.setItem("token", JSON.stringify(data.token));
+        router.replace("/(app)/(tabs)/");
+      } else {
+        alert(data.mssg);
+        console.log(data.mssg);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -48,7 +91,7 @@ const login = () => {
               Email address
             </Text>
             <TextInput
-              placeholder="Email address : "
+              placeholder="Email address"
               style={styles.inputStyles}
               value={email}
               onChangeText={setEmail}
@@ -67,7 +110,7 @@ const login = () => {
             </Text>
             <View>
               <TextInput
-                placeholder="Password:"
+                placeholder="Password"
                 style={styles.inputStyles}
                 value={password}
                 onChangeText={setPassword}
@@ -79,29 +122,27 @@ const login = () => {
                 style={styles.iconStyle}
               >
                 {showPassword ? (
-                  <Ionicons name="eye-off" size={20} />
+                  <Ionicons name="eye-off" color={"#555555"} size={20} />
                 ) : (
-                  <Ionicons name="eye" size={20} />
+                  <Ionicons name="eye" color={"#555555"} size={20} />
                 )}
               </TouchableOpacity>
             </View>
           </View>
         </View>
 
-        <Link replace href={"/(app)/(tabs)/"} asChild>
-          <TouchableOpacity style={styles.btnStyles}>
-            <Text
-              style={{
-                fontSize: 15,
-                fontFamily: "Railway2",
-                color: "white",
-                textAlign: "center",
-              }}
-            >
-              {isLoading ? <ActivityIndicator color={"white"} /> : "Signin"}
-            </Text>
-          </TouchableOpacity>
-        </Link>
+        <TouchableOpacity style={styles.btnStyles} onPress={signin}>
+          <Text
+            style={{
+              fontSize: 15,
+              fontFamily: "Railway2",
+              color: "white",
+              textAlign: "center",
+            }}
+          >
+            {isLoading ? <ActivityIndicator color={"white"} /> : "Signin"}
+          </Text>
+        </TouchableOpacity>
 
         <Text
           style={{
@@ -142,7 +183,7 @@ const styles = StyleSheet.create({
   },
 
   inputStyles: {
-    padding: 10,
+    padding: 13,
     borderColor: "#D0D5DD",
     borderWidth: 1,
     borderRadius: 5,
@@ -154,14 +195,14 @@ const styles = StyleSheet.create({
   btnStyles: {
     backgroundColor: "#385533",
     width: "100%",
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
     marginTop: 20,
   },
 
   iconStyle: {
     position: "absolute",
-    top: 15,
+    top: 20,
     right: 30,
   },
 });

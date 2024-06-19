@@ -4,8 +4,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   CodeField,
@@ -13,18 +14,69 @@ import {
   useBlurOnFulfill,
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CELL_COUNT = 4;
 
 const otp = () => {
   const [otp, setOtp] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const ref = useBlurOnFulfill({ value: otp, cellCount: CELL_COUNT });
   const [props, getCellOnLayoutHandler] = useClearByFocusCell({
     value: otp,
     setValue: setOtp,
   });
+
+  const getEmail = async () => {
+    try {
+      const jsonValue: any = await AsyncStorage.getItem("userEmail");
+      setEmail(jsonValue);
+    } catch (error) {
+      alert(error);
+      console.log(error);
+    }
+  };
+
+  const handleVerify = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://api.foodgrab.africa/couriers/api/v1/verifyEmail",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            token: otp,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok || response.status === 200) {
+        alert(data.mssg);
+        router.replace("/(auth)/congrats");
+      } else {
+        alert(data.mssg);
+      }
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getEmail();
+  }, []);
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 20, backgroundColor: "#fff" }}>
@@ -73,16 +125,13 @@ const otp = () => {
           )}
         />
 
-        <Link replace href="/(auth)/congrats" asChild>
-          <TouchableOpacity
-            style={styles.btnContainer}
-            onPress={() => {
-              /* handle verification */
-            }}
-          >
+        <TouchableOpacity style={styles.btnContainer} onPress={handleVerify}>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
             <Text style={styles.btnText}>Verify my account</Text>
-          </TouchableOpacity>
-        </Link>
+          )}
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -111,7 +160,7 @@ const styles = StyleSheet.create({
   btnContainer: {
     backgroundColor: "#385533",
     width: "100%",
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
   },
 

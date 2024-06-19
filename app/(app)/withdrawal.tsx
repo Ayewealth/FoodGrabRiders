@@ -29,8 +29,8 @@ const withdrawal = () => {
   const [bottomSheet, setBottomSheet] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const bank_key = process.env.EXPO_BANKS_API_KEY;
-  const verificaiton_key = process.env.EXPO_BANK_VERIFICATION_API_KEY;
+  const bank_key = process.env.EXPO_PUBLIC_BANKS_API_KEY;
+  const verificaiton_key = process.env.EXPO_PUBLIC_BANK_VERIFICATION_API_KEY;
 
   const snapPoint = useMemo(() => ["40%"], []);
 

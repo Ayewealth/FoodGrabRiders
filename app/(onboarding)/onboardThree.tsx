@@ -100,13 +100,13 @@ const styles = StyleSheet.create({
   btnStyles: {
     backgroundColor: "#385533",
     width: "100%",
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
   },
   btnStyles1: {
     backgroundColor: "#fff",
     width: "100%",
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#385533",

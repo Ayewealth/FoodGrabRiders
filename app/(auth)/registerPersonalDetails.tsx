@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
   Pressable,
   Platform,
+  ActivityIndicator,
+  ScrollView,
 } from "react-native";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Link } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
 import { SelectList } from "react-native-dropdown-select-list";
@@ -18,17 +19,36 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather, Entypo } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const registerPersonalDetails = () => {
-  const [nin, setNin] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
   const [date, setDate] = useState(new Date());
-  const [gender, setGender] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [driverLicense, setDriverLicense] = useState();
-  const [photo, setPhoto] = useState();
-
   const [showPicker, setShowPicker] = useState(false);
+
+  const {
+    nin,
+    setNin,
+    dateOfBirth,
+    setDateOfBirth,
+    setGender,
+    setVehicleType,
+    driverLicense,
+    setDriverLicense,
+    particulars,
+    setParticulars,
+    photo,
+    setPhoto,
+    state,
+    setState,
+    city,
+    setCity,
+    street,
+    setStreet,
+    houseNumber,
+    setHouseNumber,
+    riderSignup,
+    isLoading,
+  } = useContext(AuthContext);
 
   const toggleDatePicker = () => {
     setShowPicker(!showPicker);
@@ -54,13 +74,13 @@ const registerPersonalDetails = () => {
   };
 
   const genderDataList = [
-    { key: "1", value: "Male" },
-    { key: "2", value: "Female" },
+    { key: "1", value: "MALE" },
+    { key: "2", value: "FEMALE" },
   ];
   const vehicleDataList = [
-    { key: "1", value: "Car" },
-    { key: "2", value: "Motorcycle" },
-    { key: "2", value: "bicycle" },
+    { key: "1", value: "CAR" },
+    { key: "2", value: "MOTORCYCLE" },
+    { key: "3", value: "BICYCLE" },
   ];
 
   const handleDeletePhoto = () => {
@@ -68,6 +88,35 @@ const registerPersonalDetails = () => {
   };
   const handleDeleteLicense = () => {
     setDriverLicense(undefined);
+  };
+  const handleDeleteParticular = () => {
+    setParticulars(undefined);
+  };
+
+  const uploadParticulars = async () => {
+    try {
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        saveParticulars(result.assets[0]);
+      } else {
+        alert("You did not select any image.");
+      }
+    } catch (error) {}
+  };
+
+  const saveParticulars = async (image: any) => {
+    try {
+      setParticulars(image);
+    } catch (error) {
+      throw error;
+    }
   };
 
   const uploadLicense = async () => {
@@ -81,7 +130,7 @@ const registerPersonalDetails = () => {
       });
 
       if (!result.canceled) {
-        saveLicense(result.assets[0].uri);
+        saveLicense(result.assets[0]);
       } else {
         alert("You did not select any image.");
       }
@@ -107,7 +156,7 @@ const registerPersonalDetails = () => {
       });
 
       if (!result.canceled) {
-        savePhoto(result.assets[0].uri);
+        savePhoto(result.assets[0]);
       } else {
         alert("You did not select any image.");
       }
@@ -142,314 +191,497 @@ const registerPersonalDetails = () => {
             Enter your vehicle details
           </Text>
         </View>
-
-        <View style={{ flexDirection: "column", gap: 20 }}>
-          <View style={{ flexDirection: "column", gap: 10 }}>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              {driverLicense ? (
-                <Image source={{ uri: driverLicense }} style={styles.image} />
-              ) : (
-                <View
-                  style={{
-                    backgroundColor: "#F0F2F5",
-                    padding: 15,
-                    borderRadius: 50,
-                  }}
-                >
-                  <Feather name="upload-cloud" size={20} color="black" />
-                </View>
-              )}
-              <View>
-                <Text style={{ fontFamily: "Railway3" }}>Driver License</Text>
-                <Text
-                  style={{
-                    fontFamily: "Railway3",
-                    color: "#98A2B3",
-                    fontSize: 13,
-                  }}
-                >
-                  JPEG format{" "}
-                  <Entypo name="dot-single" size={20} color="#98A2B3" />
-                  Max. 5MB
-                </Text>
-              </View>
-              {driverLicense ? (
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#EC1C23",
-                    justifyContent: "center",
-                    paddingHorizontal: 15,
-                    borderRadius: 10,
-                  }}
-                  onPress={handleDeleteLicense}
-                >
-                  <MaterialCommunityIcons
-                    name="delete-outline"
-                    size={24}
-                    color="#fff"
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={uploadLicense}
-                  style={{
-                    backgroundColor: "#54804D",
-                    justifyContent: "center",
-                    paddingHorizontal: 15,
-                    borderRadius: 10,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontFamily: "Railway2",
-                      fontSize: 14,
-                    }}
-                  >
-                    Upload
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-
-          <View style={{ flexDirection: "column", gap: 10 }}>
-            <View
-              style={{ flexDirection: "row", justifyContent: "space-between" }}
-            >
-              {photo ? (
-                <Image source={{ uri: photo }} style={styles.image} />
-              ) : (
-                <View
-                  style={{
-                    backgroundColor: "#F0F2F5",
-                    padding: 15,
-                    borderRadius: 50,
-                  }}
-                >
-                  <Feather name="upload-cloud" size={20} color="black" />
-                </View>
-              )}
-              <View>
-                <Text style={{ fontFamily: "Railway3" }}>Your Face</Text>
-                <Text
-                  style={{
-                    fontFamily: "Railway3",
-                    color: "#98A2B3",
-                    fontSize: 13,
-                  }}
-                >
-                  JPEG format{" "}
-                  <Entypo name="dot-single" size={20} color="#98A2B3" />
-                  Max. 5MB
-                </Text>
-              </View>
-              {photo ? (
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#EC1C23",
-                    justifyContent: "center",
-                    paddingHorizontal: 15,
-                    borderRadius: 10,
-                  }}
-                  onPress={handleDeletePhoto}
-                >
-                  <MaterialCommunityIcons
-                    name="delete-outline"
-                    size={24}
-                    color="#fff"
-                  />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={uploadPhoto}
-                  style={{
-                    backgroundColor: "#54804D",
-                    justifyContent: "center",
-                    paddingHorizontal: 15,
-                    borderRadius: 10,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontFamily: "Railway2",
-                      fontSize: 14,
-                    }}
-                  >
-                    Upload
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        </View>
-        <View style={{ flexDirection: "column", gap: 15, marginTop: 5 }}>
-          <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
-            <Text
-              style={{
-                fontFamily: "Railway3",
-                fontSize: 14,
-              }}
-            >
-              NIN (National Identification Number)
-            </Text>
-            <TextInput
-              placeholder="NIN"
-              style={styles.inputStyles}
-              value={nin}
-              onChangeText={setNin}
-              placeholderTextColor="#11182744"
-            />
-          </View>
-          <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
-            <Text
-              style={{
-                fontFamily: "Railway3",
-                fontSize: 14,
-              }}
-            >
-              DOB (Date Of Birth)
-            </Text>
-            {showPicker && (
-              <DateTimePicker
-                mode="date"
-                display="spinner"
-                value={date}
-                onChange={PickerOnChange}
-                style={{ height: 120, marginTop: -10 }}
-              />
-            )}
-            {showPicker && Platform.OS === "ios" && (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        >
+          <View style={{ flexDirection: "column", gap: 20 }}>
+            <View style={{ flexDirection: "column", gap: 10 }}>
               <View
-                style={{ flexDirection: "row", justifyContent: "space-around" }}
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
               >
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#11182711",
-                    height: 50,
-                    justifyContent: "center",
-                    alignContent: "center",
-                    borderRadius: 50,
-                    marginTop: 10,
-                    marginBottom: 15,
-                    paddingHorizontal: 20,
-                  }}
-                  onPress={toggleDatePicker}
-                >
+                {driverLicense ? (
+                  <Image
+                    source={{ uri: driverLicense.uri }}
+                    style={styles.image}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      backgroundColor: "#F0F2F5",
+                      padding: 15,
+                      borderRadius: 50,
+                    }}
+                  >
+                    <Feather name="upload-cloud" size={20} color="black" />
+                  </View>
+                )}
+                <View>
+                  <Text style={{ fontFamily: "Railway3" }}>Driver License</Text>
                   <Text
                     style={{
                       fontFamily: "Railway3",
-                      fontWeight: "500",
-                      fontSize: 14,
-                      color: "#385533",
+                      color: "#98A2B3",
+                      fontSize: 13,
                     }}
                   >
-                    Cancel
+                    JPEG format{" "}
+                    <Entypo name="dot-single" size={20} color="#98A2B3" />
+                    Max. 5MB
                   </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#385533",
-                    height: 50,
-                    justifyContent: "center",
-                    alignContent: "center",
-                    borderRadius: 50,
-                    marginTop: 10,
-                    marginBottom: 15,
-                    paddingHorizontal: 20,
-                  }}
-                  onPress={confirmIOSDate}
-                >
-                  <Text
+                </View>
+                {driverLicense ? (
+                  <TouchableOpacity
                     style={{
-                      fontFamily: "Railway3",
-                      fontWeight: "500",
-                      fontSize: 14,
-                      color: "#fff",
+                      backgroundColor: "#EC1C23",
+                      justifyContent: "center",
+                      paddingHorizontal: 15,
+                      borderRadius: 10,
+                    }}
+                    onPress={handleDeleteLicense}
+                  >
+                    <MaterialCommunityIcons
+                      name="delete-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={uploadLicense}
+                    style={{
+                      backgroundColor: "#54804D",
+                      justifyContent: "center",
+                      paddingHorizontal: 15,
+                      borderRadius: 10,
                     }}
                   >
-                    Confirm
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontFamily: "Railway2",
+                        fontSize: 14,
+                      }}
+                    >
+                      Upload
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
-            )}
-            {!showPicker && (
-              <Pressable onPress={toggleDatePicker}>
-                <TextInput
-                  placeholder="Sat Aug 21 2024"
-                  style={styles.inputStyles}
-                  value={dateOfBirth}
-                  onChangeText={setDateOfBirth}
-                  editable={false}
-                  onPressIn={toggleDatePicker}
+            </View>
+
+            <View style={{ flexDirection: "column", gap: 10 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                {particulars ? (
+                  <Image
+                    source={{ uri: particulars.uri }}
+                    style={styles.image}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      backgroundColor: "#F0F2F5",
+                      padding: 15,
+                      borderRadius: 50,
+                    }}
+                  >
+                    <Feather name="upload-cloud" size={20} color="black" />
+                  </View>
+                )}
+                <View>
+                  <Text style={{ fontFamily: "Railway3" }}>Particulars</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Railway3",
+                      color: "#98A2B3",
+                      fontSize: 13,
+                    }}
+                  >
+                    JPEG format{" "}
+                    <Entypo name="dot-single" size={20} color="#98A2B3" />
+                    Max. 5MB
+                  </Text>
+                </View>
+                {particulars ? (
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#EC1C23",
+                      justifyContent: "center",
+                      paddingHorizontal: 15,
+                      borderRadius: 10,
+                    }}
+                    onPress={handleDeleteParticular}
+                  >
+                    <MaterialCommunityIcons
+                      name="delete-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={uploadParticulars}
+                    style={{
+                      backgroundColor: "#54804D",
+                      justifyContent: "center",
+                      paddingHorizontal: 15,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontFamily: "Railway2",
+                        fontSize: 14,
+                      }}
+                    >
+                      Upload
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "column", gap: 10 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                {photo ? (
+                  <Image source={{ uri: photo.uri }} style={styles.image} />
+                ) : (
+                  <View
+                    style={{
+                      backgroundColor: "#F0F2F5",
+                      padding: 15,
+                      borderRadius: 50,
+                    }}
+                  >
+                    <Feather name="upload-cloud" size={20} color="black" />
+                  </View>
+                )}
+                <View>
+                  <Text style={{ fontFamily: "Railway3" }}>Your Face</Text>
+                  <Text
+                    style={{
+                      fontFamily: "Railway3",
+                      color: "#98A2B3",
+                      fontSize: 13,
+                    }}
+                  >
+                    JPEG format{" "}
+                    <Entypo name="dot-single" size={20} color="#98A2B3" />
+                    Max. 5MB
+                  </Text>
+                </View>
+                {photo ? (
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#EC1C23",
+                      justifyContent: "center",
+                      paddingHorizontal: 15,
+                      borderRadius: 10,
+                    }}
+                    onPress={handleDeletePhoto}
+                  >
+                    <MaterialCommunityIcons
+                      name="delete-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    onPress={uploadPhoto}
+                    style={{
+                      backgroundColor: "#54804D",
+                      justifyContent: "center",
+                      paddingHorizontal: 15,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "#fff",
+                        fontFamily: "Railway2",
+                        fontSize: 14,
+                      }}
+                    >
+                      Upload
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+          <View style={{ flexDirection: "column", gap: 15, marginTop: 5 }}>
+            <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
+              <Text
+                style={{
+                  fontFamily: "Railway3",
+                  fontSize: 14,
+                }}
+              >
+                NIN (National Identification Number)
+              </Text>
+              <TextInput
+                placeholder="NIN"
+                style={styles.inputStyles}
+                value={nin}
+                onChangeText={setNin}
+                placeholderTextColor="#55555"
+              />
+            </View>
+            <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
+              <Text
+                style={{
+                  fontFamily: "Railway3",
+                  fontSize: 14,
+                }}
+              >
+                DOB (Date Of Birth)
+              </Text>
+              {showPicker && (
+                <DateTimePicker
+                  mode="date"
+                  display="spinner"
+                  value={date}
+                  onChange={PickerOnChange}
+                  style={{ height: 120, marginTop: -10 }}
                 />
-              </Pressable>
+              )}
+              {showPicker && Platform.OS === "ios" && (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#11182711",
+                      height: 50,
+                      justifyContent: "center",
+                      alignContent: "center",
+                      borderRadius: 50,
+                      marginTop: 10,
+                      marginBottom: 15,
+                      paddingHorizontal: 20,
+                    }}
+                    onPress={toggleDatePicker}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Railway3",
+                        fontWeight: "500",
+                        fontSize: 14,
+                        color: "#385533",
+                      }}
+                    >
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "#385533",
+                      height: 50,
+                      justifyContent: "center",
+                      alignContent: "center",
+                      borderRadius: 50,
+                      marginTop: 10,
+                      marginBottom: 15,
+                      paddingHorizontal: 20,
+                    }}
+                    onPress={confirmIOSDate}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Railway3",
+                        fontWeight: "500",
+                        fontSize: 14,
+                        color: "#fff",
+                      }}
+                    >
+                      Confirm
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {!showPicker && (
+                <Pressable onPress={toggleDatePicker}>
+                  <TextInput
+                    placeholder="Sat Aug 21 2024"
+                    style={styles.inputStyles}
+                    value={dateOfBirth}
+                    onChangeText={setDateOfBirth}
+                    editable={false}
+                    onPressIn={toggleDatePicker}
+                  />
+                </Pressable>
+              )}
+            </View>
+            <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
+              <Text
+                style={{
+                  fontFamily: "Railway3",
+                  fontSize: 14,
+                }}
+              >
+                Gender
+              </Text>
+              <SelectList
+                setSelected={(val: any) => setGender(val)}
+                data={genderDataList}
+                save="value"
+                placeholder="Gender"
+                search={false}
+                boxStyles={{
+                  borderRadius: 5,
+                  borderColor: "#D0D5DD",
+                  padding: 13,
+                }}
+              />
+            </View>
+            <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
+              <Text
+                style={{
+                  fontFamily: "Railway3",
+                  fontSize: 14,
+                }}
+              >
+                Vehicle
+              </Text>
+              <SelectList
+                setSelected={(val: any) => setVehicleType(val)}
+                data={vehicleDataList}
+                save="value"
+                placeholder="Vehicle"
+                search={false}
+                boxStyles={{
+                  borderRadius: 5,
+                  borderColor: "#D0D5DD",
+                  padding: 20,
+                }}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-between",
+                gap: 10,
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: "column", gap: 7 }}>
+                <Text
+                  style={{
+                    fontFamily: "Railway3",
+                    fontSize: 14,
+                  }}
+                >
+                  State
+                </Text>
+                <TextInput
+                  placeholder="Enter your state"
+                  style={styles.inputStyles}
+                  value={state}
+                  onChangeText={setState}
+                  placeholderTextColor="#55555"
+                />
+              </View>
+              <View style={{ flex: 1, flexDirection: "column", gap: 7 }}>
+                <Text
+                  style={{
+                    fontFamily: "Railway3",
+                    fontSize: 14,
+                  }}
+                >
+                  City
+                </Text>
+                <TextInput
+                  placeholder="Enter your city"
+                  style={styles.inputStyles}
+                  value={city}
+                  onChangeText={setCity}
+                  placeholderTextColor="#55555"
+                />
+              </View>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                width: "100%",
+                justifyContent: "space-between",
+                gap: 10,
+              }}
+            >
+              <View style={{ flex: 1, flexDirection: "column", gap: 7 }}>
+                <Text
+                  style={{
+                    fontFamily: "Railway3",
+                    fontSize: 14,
+                  }}
+                >
+                  Street
+                </Text>
+                <TextInput
+                  placeholder="Enter your street"
+                  style={styles.inputStyles}
+                  value={street}
+                  onChangeText={setStreet}
+                  placeholderTextColor="#55555"
+                />
+              </View>
+              <View style={{ flex: 1, flexDirection: "column", gap: 7 }}>
+                <Text
+                  style={{
+                    fontFamily: "Railway3",
+                    fontSize: 14,
+                  }}
+                >
+                  House Number
+                </Text>
+                <TextInput
+                  placeholder="Enter your house number"
+                  style={styles.inputStyles}
+                  value={houseNumber}
+                  onChangeText={setHouseNumber}
+                  placeholderTextColor="#55555"
+                />
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity onPress={riderSignup} style={styles.btnStyles}>
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: "#fff",
+                  fontSize: 15,
+                  fontFamily: "Railway3",
+                  fontWeight: "300",
+                }}
+              >
+                Procced
+              </Text>
             )}
-          </View>
-          <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
-            <Text
-              style={{
-                fontFamily: "Railway3",
-                fontSize: 14,
-              }}
-            >
-              Gender
-            </Text>
-            <SelectList
-              setSelected={(val: any) => setGender(val)}
-              data={genderDataList}
-              save="value"
-              placeholder="Gender"
-              search={false}
-              boxStyles={{
-                borderRadius: 5,
-                borderColor: "#D0D5DD",
-                padding: 10,
-              }}
-            />
-          </View>
-          <View style={{ width: "100%", flexDirection: "column", gap: 7 }}>
-            <Text
-              style={{
-                fontFamily: "Railway3",
-                fontSize: 14,
-              }}
-            >
-              Vehicle
-            </Text>
-            <SelectList
-              setSelected={(val: any) => setVehicleType(val)}
-              data={vehicleDataList}
-              save="value"
-              placeholder="Vehicle"
-              search={false}
-              boxStyles={{
-                borderRadius: 5,
-                borderColor: "#D0D5DD",
-                padding: 10,
-              }}
-            />
-          </View>
-        </View>
-        <Link replace href={"/(auth)/otp"} asChild>
-          <TouchableOpacity style={styles.btnStyles}>
-            <Text
-              style={{
-                textAlign: "center",
-                color: "#fff",
-                fontSize: 15,
-                fontFamily: "Railway3",
-                fontWeight: "300",
-              }}
-            >
-              Procced
-            </Text>
           </TouchableOpacity>
-        </Link>
+        </ScrollView>
       </Animated.View>
     </SafeAreaView>
   );
@@ -461,17 +693,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    gap: 15,
+    gap: 20,
     backgroundColor: "white",
     marginTop: 20,
-    borderTopEndRadius: 20,
+    borderTopRightRadius: 20,
     borderTopLeftRadius: 20,
     paddingTop: 20,
     paddingBottom: 50,
     paddingHorizontal: 20,
   },
   inputStyles: {
-    padding: 10,
+    padding: 13,
     borderColor: "#D0D5DD",
     borderWidth: 1,
     borderRadius: 5,
@@ -482,7 +714,7 @@ const styles = StyleSheet.create({
   btnStyles: {
     backgroundColor: "#385533",
     width: "100%",
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
     marginTop: 20,
   },

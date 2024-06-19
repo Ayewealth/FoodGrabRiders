@@ -34,7 +34,7 @@ const permittion = () => {
         style={{
           backgroundColor: "#385533",
           width: "100%",
-          padding: 20,
+          padding: 15,
           borderRadius: 10,
         }}
       >

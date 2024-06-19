@@ -12,7 +12,11 @@ import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useState } from "react";
 export { ErrorBoundary } from "expo-router";
 
-import { AuthContext, AuthContextProvider } from "@/contexts/AuthContext";
+import {
+  AuthContext,
+  AuthContextProvider,
+  useAuth,
+} from "@/contexts/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const unstable_settings = {
@@ -26,12 +30,16 @@ const InitialLayout = () => {
   const router = useRouter();
 
   const [seenScreen, setSeenScreen] = useState<any>(false);
-  const { isAuthenticated, status, startBackgroundTracking } =
+  const { status, startBackgroundTracking, setIsAuthenticated } =
     useContext(AuthContext);
+
+  const { isAuthenticated } = useAuth();
 
   const getScreen = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("seenScreen");
+      const auth = await AsyncStorage.getItem("isAuthenticated");
+      setIsAuthenticated(auth);
       setSeenScreen(jsonValue);
     } catch (error) {
       console.log(error);
@@ -48,10 +56,11 @@ const InitialLayout = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof isAuthenticated == "undefined") return;
     const inTabsGroup = segments[0] === "(app)";
 
     if (isAuthenticated && !inTabsGroup) {
-      router.replace("/(app)/(tabs)/");
+      router.push("/(app)/(tabs)/");
     } else if (
       !isAuthenticated &&
       status === "granted" &&

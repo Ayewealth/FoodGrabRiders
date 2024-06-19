@@ -43,7 +43,7 @@ const congrats = () => {
             now ready to embark on a delicious journey with foodie delight.
           </Text>
         </View>
-        <Link replace href={"/(app)/(tabs)/"} asChild>
+        <Link replace href={"/(auth)/login"} asChild>
           <TouchableOpacity style={styles.btnStyles}>
             <Text
               style={{
@@ -54,7 +54,7 @@ const congrats = () => {
                 fontWeight: "300",
               }}
             >
-              Go Home
+              Login
             </Text>
           </TouchableOpacity>
         </Link>
