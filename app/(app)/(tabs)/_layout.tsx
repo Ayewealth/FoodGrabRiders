@@ -6,19 +6,54 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
+import isEqual from "lodash.isequal";
 
 import CustomDrawerComponent from "@/components/CustomDrawerComponent";
 import { Text, TouchableOpacity, View } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { DrawerActions } from "@react-navigation/native";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const TabLayout = () => {
   const navigate = useRouter();
   const navigation = useNavigation();
 
+  const { userToken, userData, setUserData } = useContext(AuthContext);
+
   const ToggleDrawer = () => {
     navigation.dispatch(DrawerActions.toggleDrawer());
   };
+
+  const getUserDetails = async () => {
+    let response = await fetch(
+      "https://api.foodgrab.africa/couriers/api/v1/getProfile",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      if (!isEqual(userData, data)) {
+        setUserData(data);
+        console.log("User Details updated");
+      } else {
+        console.log("User Details are the same, no update needed");
+      }
+    } else {
+      console.log(data);
+    }
+  };
+
+  useEffect(() => {
+    getUserDetails();
+  }, [userData]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

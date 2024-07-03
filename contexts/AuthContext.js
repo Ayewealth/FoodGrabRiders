@@ -122,6 +122,15 @@ export const AuthContextProvider = ({ children }) => {
     }
   };
 
+  const logoutUser = async () => {
+    await AsyncStorage.removeItem("isAuthenticated");
+    await AsyncStorage.removeItem("token");
+
+    setUserToken(null);
+    setUserData(null);
+    setIsAuthenticated(false);
+  };
+
   const startBackgroundTracking = async () => {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status == "granted") {
@@ -140,6 +149,7 @@ export const AuthContextProvider = ({ children }) => {
     isAuthenticated,
     setIsAuthenticated,
     isLoading,
+    logoutUser,
 
     startBackgroundTracking,
     status,

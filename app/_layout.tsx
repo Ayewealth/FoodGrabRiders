@@ -57,15 +57,12 @@ const InitialLayout = () => {
 
   useEffect(() => {
     if (typeof isAuthenticated == "undefined") return;
+
     const inTabsGroup = segments[0] === "(app)";
 
     if (isAuthenticated && !inTabsGroup) {
       router.push("/(app)/(tabs)/");
-    } else if (
-      !isAuthenticated &&
-      status === "granted" &&
-      (seenScreen === false || seenScreen === null)
-    ) {
+    } else if (!isAuthenticated && status === "granted" && !seenScreen) {
       router.replace("/(onboarding)/onboardOne");
     } else if (!isAuthenticated && status === "granted" && seenScreen) {
       router.replace("/(auth)/login");

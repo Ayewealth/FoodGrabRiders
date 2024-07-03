@@ -79,7 +79,12 @@ const login = () => {
           Welcome back, login to place your order today
         </Text>
 
-        <View style={{ paddingTop: 0 }}>
+        <View
+          style={{
+            paddingTop: 0,
+            alignItems: "flex-end",
+          }}
+        >
           <View style={styles.inputDiv}>
             <Text
               style={{
@@ -129,6 +134,20 @@ const login = () => {
               </TouchableOpacity>
             </View>
           </View>
+
+          <Link href={"/(auth)/(forget)/forgetPassword"} asChild>
+            <TouchableOpacity style={{ paddingTop: 10 }}>
+              <Text
+                style={{
+                  fontFamily: "Railway3",
+                  fontSize: 14,
+                  color: "#555555",
+                }}
+              >
+                Forgotten Password?
+              </Text>
+            </TouchableOpacity>
+          </Link>
         </View>
 
         <TouchableOpacity style={styles.btnStyles} onPress={signin}>
@@ -180,6 +199,7 @@ const styles = StyleSheet.create({
 
   inputDiv: {
     paddingTop: 20,
+    width: "100%",
   },
 
   inputStyles: {

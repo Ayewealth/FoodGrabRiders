@@ -16,7 +16,9 @@ import { Link } from "expo-router";
 export default function TabOneScreen() {
   const { location } = useContext(AuthContext);
   const [online, setOnline] = useState(false);
-  const [loading, setLoading] = useState(true); // Added loading state
+  const [loading, setLoading] = useState(true);
+
+  const { userData } = useContext(AuthContext);
 
   const handleOnline = () => {
     setOnline(!online);
@@ -31,7 +33,7 @@ export default function TabOneScreen() {
 
   useEffect(() => {
     if (location) {
-      setLoading(false); // Set loading to false when location is available
+      setLoading(false);
     }
   }, [location]);
 
@@ -111,7 +113,7 @@ export default function TabOneScreen() {
             <Text
               style={{ fontFamily: "Railway2", color: "#385533", fontSize: 24 }}
             >
-              &#x20A6;15,000
+              &#x20A6;{userData?.data?.walletBalance}
             </Text>
           </View>
           <View>

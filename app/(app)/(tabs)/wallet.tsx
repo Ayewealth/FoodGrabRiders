@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import {
   View,
   Text,
@@ -11,9 +11,12 @@ import { SelectList } from "react-native-dropdown-select-list";
 import { Feather } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const wallet = () => {
   const [transactionFilter, setTransactionFilter] = useState("");
+
+  const { userData } = useContext(AuthContext);
 
   const genderDataList = [
     { key: "1", value: "Today" },
@@ -72,7 +75,7 @@ const wallet = () => {
               zIndex: 1,
             }}
           >
-            &#x20A6;15,000.00
+            &#x20A6;{userData?.data?.walletBalance}
           </Text>
         </View>
         <Link href={"/(app)/withdrawal"} asChild>

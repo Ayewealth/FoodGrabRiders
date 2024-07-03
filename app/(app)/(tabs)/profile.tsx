@@ -6,15 +6,58 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "@/contexts/AuthContext";
 
 const profile = () => {
-  const [fullName, setFullName] = useState("Kingley Gbotemi");
-  const [phoneNumber, setPhoneNumber] = useState("08143236758");
-  const [emailAddress, setEmailAddress] = useState("Kingtemi@email.com");
+  const { userData, userToken } = useContext(AuthContext);
+
+  const [fullName, setFullName] = useState(
+    userData && userData
+      ? `${userData.data.firstName} ${userData.data.lastName}`
+      : "Kingley Gbotemi"
+  );
+  const [phoneNumber, setPhoneNumber] = useState(
+    userData && userData ? userData.data.phoneNumber : "08143236758"
+  );
+  const [emailAddress, setEmailAddress] = useState(
+    userData && userData ? userData.data.email : "Kingtemi@email.com"
+  );
+  const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const changePassword = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://api.foodgrab.africa/couriers/api/v1/updatePassword",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            oldPassword: oldPassword,
+            newPassword: newPassword,
+          }),
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.mssg);
+      } else {
+        alert(data.mssg);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -117,25 +160,25 @@ const profile = () => {
           >
             <View style={{ flexDirection: "column", gap: 10 }}>
               <Text style={{ fontFamily: "Railway3", fontSize: 15 }}>
+                Old Password
+              </Text>
+              <TextInput
+                value={oldPassword}
+                style={styles.inputStyles}
+                onChangeText={setOldPassword}
+                placeholder="Old Password"
+                placeholderTextColor="#11182744"
+              />
+            </View>
+            <View style={{ flexDirection: "column", gap: 10 }}>
+              <Text style={{ fontFamily: "Railway3", fontSize: 15 }}>
                 New Password
               </Text>
               <TextInput
                 value={newPassword}
                 style={styles.inputStyles}
                 onChangeText={setNewPassword}
-                placeholder="Password"
-                placeholderTextColor="#11182744"
-              />
-            </View>
-            <View style={{ flexDirection: "column", gap: 10 }}>
-              <Text style={{ fontFamily: "Railway3", fontSize: 15 }}>
-                Confirm New Password
-              </Text>
-              <TextInput
-                value={confirmPassword}
-                style={styles.inputStyles}
-                onChangeText={setConfirmPassword}
-                placeholder="Confirm Password"
+                placeholder="New Password"
                 placeholderTextColor="#11182744"
               />
             </View>
@@ -144,6 +187,7 @@ const profile = () => {
       </View>
       <View style={{ paddingHorizontal: 20 }}>
         <TouchableOpacity
+          onPress={changePassword}
           style={{
             backgroundColor: "#385533",
             padding: 20,
@@ -159,7 +203,11 @@ const profile = () => {
               fontWeight: "600",
             }}
           >
-            Change Password
+            {loading ? (
+              <ActivityIndicator color={"white"} />
+            ) : (
+              "Change Password"
+            )}
           </Text>
         </TouchableOpacity>
       </View>
